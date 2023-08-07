@@ -74,6 +74,8 @@ cd fscan_report
 chmod +x run.sh
 ./run.sh
 ```
+启动后，访问https://127.0.0.1:11451/
+
 默认用户名:admin 默认密码:report 
 
 
