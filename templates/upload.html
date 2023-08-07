@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>fscan报告导入</title>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .upload-button {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .upload-button:hover {
+      background-color: #45a049;
+    }
+
+    .upload-label {
+      display: inline-block;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #f8f8f8;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .upload-label:hover {
+      background-color: #e8e8e8;
+    }
+
+    .delete-link {
+      color: #cc0000;
+      text-decoration: none;
+    }
+
+    .delete-link:hover {
+      text-decoration: underline;
+    }
+
+    .distinct-ip {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .export-section {
+      margin-top: 20px;
+    }
+
+    .export-section a {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #333;
+      text-decoration: none;
+    }
+
+    .export-section a:hover {
+      text-decoration: underline;
+    }
+
+    .progress-bar {
+      
+      width: 100%;
+      height: 20px;
+      background-color: #f2f2f2;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-inner {
+      max-width: 100%;
+      height: 100%;
+      background-color: #4CAF50;
+      width: 0%;
+    }
+    
+  </style>
+</head>
+<body>
+<h1>fscan报告导入</h1>
+
+<form action="/upload" method="POST" enctype="multipart/form-data" id="upload-form" target="upload-iframe">
+    <label for="files" class="upload-label">选择文件</label>
+    <input type="file" id="files" name="files" multiple>
+    <button onclick="uploadFiles()" class="upload-button">Upload</button>
+	<div id="progress-bar"></div>
+	
+</form>
+
+<!-- Progress Bar -->
+<div class="progress-bar">
+  <div class="progress-bar-inner" id="progress-bar-inner"></div>
+</div>
+
+<!-- Hidden iframe for receiving upload response -->
+<iframe id="upload-iframe" name="upload-iframe" style="display: none;"></iframe>
+
+<hr>
+
+<p class="distinct-ip">IP数：{{ ip_count }}</p>
+<br>
+<a href="/upload?delete=1" class="delete-link" onclick="return confirm('确定要删除所有报告数据和文件吗？')">删除所有报告数据和文件</a>
+
+
+<div class="export-section">
+  <a href="/upload/web_info">导出Web url</a>
+  <a href="/upload/ip_port">导出IP+port  格式ip:port</a>
+  <a href="/upload/vulnerabilities">导出所有漏洞</a>
+</div>
+
+<script>
+function uploadFiles() {
+    var files = document.getElementById('files').files;
+
+    var totalSize = 0;
+    for (var i = 0; i < files.length; i++) {
+        totalSize += files[i].size;
+    }
+
+    var totalUploaded = 0;
+
+    // 增加一个计数器来跟踪已完成的上传请求
+    var completedRequests = 0;
+
+    for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        var chunkSize = 1024 * 1024; 
+        var start = 0;
+
+        while (start < file.size) {
+            var end = start + chunkSize;
+            if (end > file.size) {
+                end = file.size;
+            }
+
+            var chunk = file.slice(start, end);
+            var formData = new FormData();
+            formData.append('file', chunk);
+            formData.append('filename', file.name);
+            formData.append('start', start);
+            formData.append('is_last_chunk', end == file.size);
+
+            var request = new XMLHttpRequest();
+            request.open('POST', '/upload', true);
+
+            request.upload.addEventListener('progress', function(e) {
+                if (e.lengthComputable) {
+                    totalUploaded += e.loaded;
+                    var percent = Math.round((totalUploaded / totalSize) * 100);
+                    document.getElementById('progress-bar-inner').style.width = percent + '%';
+                }
+            });
+
+            // 当请求完成时（无论成功还是失败），增加计数器的值
+            request.onloadend = function() {
+                completedRequests++;
+                if (completedRequests === files.length) {
+                    location.reload();  // 当所有文件都上传完毕，刷新页面
+                }
+            };
+
+            request.send(formData);
+
+            start = end;
+        }
+    }
+}
+
+
+</script>
+</body>
+</html>

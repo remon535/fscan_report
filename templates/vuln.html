@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>漏洞报告</title>
+  <style>
+.pagination {
+  margin-top: 20px;
+  text-align: center;
+  list-style-type: none;
+  padding: 0;
+}
+
+.pagination li {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.pagination a {
+  padding: 8px;
+  background-color: #333;
+  color: #fff;
+  text-decoration: none;
+}
+
+.pagination a:hover {
+  background-color: #555;
+}
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+
+    td {
+      padding: 8px;
+      text-align: left;
+      border: 1px solid #ccc;
+    }
+
+    .http {
+      background-color: #ffcccc;
+    }
+    .https{
+      background-color: #ffcccc;
+    }
+
+
+    .redis {
+      background-color: #ccffcc;
+    }
+
+    .ftp {
+      background-color: #ccccff;
+    }
+
+    .refresh-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px;
+      background-color: #333;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .refresh-button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>漏洞报告</h1>
+
+  <table>
+    <tr>
+      <th>IP 地址</th>
+      <th>详情</th>
+    </tr>
+    {% for vulnerability in vulnerabilities %}
+      <tr class="{{ vulnerability.description|get_protocol_class }}">
+        <td>{{ vulnerability.ip }}</td>
+        <td>{{ vulnerability.description }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+
+  {{ pagination.links }}
+
+  <button class="refresh-button" onclick="window.location.reload()">Refresh</button>
+  <h1>漏洞统计</h1>
+  <img src="{{ chart_file }}" alt="Vulnerability Counts">
+</body>
+</html>

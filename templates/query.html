@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>数据查询</title>
+</head>
+<body>
+    <h1>数据查询</h1>
+    
+    <form action="/query" method="GET">
+        <label for="query-input">输入单个ip或者c段(192.168.0,192.168.0.0/24):</label>
+        <input type="text" id="query-input" name="query">
+        <input type="submit" value="Search">
+    </form>
+    
+    {% if query_result %}
+        <h2>Result:</h2>
+        {% if query_result.web_infos %}
+            <h3>Web Information:</h3>
+            <ul>
+                {% for web_info in query_result.web_infos %}
+                    <li>URL: {{ web_info.url }} Title: {{ web_info.title }}</li>
+                    <br>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% if query_result.port_infos %}
+            <h3>Open Ports:</h3>
+            <ul>
+                {% for port_info in query_result.port_infos %}
+                    <li>{{ port_info.ip }}:{{ port_info.port }}</li>
+                    <br>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        {% if query_result.vulnerabilities %}
+            <h3>Vulnerabilities:</h3>
+            <ul>
+                {% for vulnerability in query_result.vulnerabilities %}
+                    <li>{{ vulnerability.description }}</li>
+                    <br>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
